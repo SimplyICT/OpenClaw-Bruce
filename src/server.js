@@ -716,18 +716,18 @@ app.get("/setup/api/status", requireSetupAuth, async (_req, res) => {
       ],
       models: [
         {
-          id: "deepseek-ai/DeepSeek-V3.2",
-          name: "DeepSeek V3.2 (default)",
-          description: "Latest DeepSeek model with strong reasoning and coding",
-          contextWindow: 163840,
+          id: "zai-org/GLM-4.7-Flash",
+          name: "GLM-4.7 Flash (default)",
+          description: "Fast and efficient large language model",
+          contextWindow: 131072,
           inputPrice: 0.00,
           outputPrice: 0.00,
         },
         {
-          id: "zai-org/GLM-4.7-Flash",
-          name: "GLM-4.7 Flash",
-          description: "Fast and efficient large language model",
-          contextWindow: 131072,
+          id: "deepseek-ai/DeepSeek-V3.2",
+          name: "DeepSeek V3.2",
+          description: "Latest DeepSeek model with strong reasoning and coding",
+          contextWindow: 163840,
           inputPrice: 0.00,
           outputPrice: 0.00,
         },
@@ -1245,7 +1245,7 @@ app.post("/setup/api/run", requireSetupAuth, async (req, res) => {
 
       // Configure ModelScope.ai if selected (using OpenAI-compatible endpoint)
       if (payload.authChoice === "modelscope-api-key") {
-        const msModel = payload.modelscopeModel || "deepseek-ai/DeepSeek-V3.2";
+        const msModel = payload.modelscopeModel || "zai-org/GLM-4.7-Flash";
         console.log(`[modelscope] Configuring ModelScope.ai provider with model: ${msModel}`);
 
         await runCmd(
@@ -1258,8 +1258,8 @@ app.post("/setup/api/run", requireSetupAuth, async (req, res) => {
           apiKey: "${OPENAI_API_KEY}",
           api: "openai-completions",
           models: [
-            { id: "deepseek-ai/DeepSeek-V3.2", name: "DeepSeek V3.2" },
             { id: "zai-org/GLM-4.7-Flash", name: "GLM-4.7 Flash" },
+            { id: "deepseek-ai/DeepSeek-V3.2", name: "DeepSeek V3.2" },
           ]
         };
 

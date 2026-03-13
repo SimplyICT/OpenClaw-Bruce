@@ -20,7 +20,7 @@
       authSecret: '',
       flow: 'quickstart',
       atlasModel: 'moonshotai/kimi-k2.5',
-      modelscopeModel: 'deepseek-ai/DeepSeek-V3.2',
+      modelscopeModel: 'zai-org/GLM-4.7-Flash',
       telegramToken: '',
       discordToken: '',
       slackBotToken: '',
@@ -296,7 +296,7 @@
     state.formData.authSecret = els.authSecret ? els.authSecret.value : '';
     state.formData.flow = els.flow ? els.flow.value : 'quickstart';
     state.formData.atlasModel = els.atlasModel ? els.atlasModel.value : 'minimaxai/minimax-m2.5';
-    state.formData.modelscopeModel = els.modelscopeModel ? els.modelscopeModel.value : 'deepseek-ai/DeepSeek-V3.2';
+    state.formData.modelscopeModel = els.modelscopeModel ? els.modelscopeModel.value : 'zai-org/GLM-4.7-Flash';
     state.formData.telegramToken = els.telegramToken ? els.telegramToken.value : '';
     state.formData.discordToken = els.discordToken ? els.discordToken.value : '';
     state.formData.slackBotToken = els.slackBotToken ? els.slackBotToken.value : '';
@@ -1063,7 +1063,7 @@
           authSecret: '',
           flow: 'quickstart',
           atlasModel: 'moonshotai/kimi-k2.5',
-          modelscopeModel: 'deepseek-ai/DeepSeek-V3.2',
+          modelscopeModel: 'zai-org/GLM-4.7-Flash',
           telegramToken: '',
           discordToken: '',
           slackBotToken: '',
