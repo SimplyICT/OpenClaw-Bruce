@@ -18,35 +18,38 @@ jobs:
       - name: Get latest openclaw release
         id: latest
         run: |
-          LATEST=$(curl -s https://api.github.com/repos/openclaw/openclaw/releases/latest | jq -r '.tag_name')
-          echo "tag=$LATEST" >> $GITHUB_OUTPUT
+          # GitHub release tag is e.g. v2026.3.28; GHCR image tag drops the 'v'
+          GH_TAG=$(curl -s https://api.github.com/repos/openclaw/openclaw/releases/latest | jq -r '.tag_name')
+          IMAGE_TAG="${GH_TAG#v}"
+          echo "gh_tag=$GH_TAG" >> $GITHUB_OUTPUT
+          echo "image_tag=$IMAGE_TAG" >> $GITHUB_OUTPUT
 
-      - name: Get current version from Dockerfile
+      - name: Get current image tag from Dockerfile
         id: current
         run: |
-          CURRENT=$(grep 'ARG OPENCLAW_GIT_REF=' Dockerfile | sed 's/ARG OPENCLAW_GIT_REF=//')
-          echo "tag=$CURRENT" >> $GITHUB_OUTPUT
+          CURRENT=$(grep 'ARG OPENCLAW_IMAGE=' Dockerfile | sed 's|.*openclaw:||')
+          echo "image_tag=$CURRENT" >> $GITHUB_OUTPUT
 
       - name: Update Dockerfile
-        if: steps.latest.outputs.tag != steps.current.outputs.tag
+        if: steps.latest.outputs.image_tag != steps.current.outputs.image_tag
         run: |
-          sed -i 's/ARG OPENCLAW_GIT_REF=.*/ARG OPENCLAW_GIT_REF=${{ steps.latest.outputs.tag }}/' Dockerfile
+          sed -i 's|ARG OPENCLAW_IMAGE=.*|ARG OPENCLAW_IMAGE=ghcr.io/openclaw/openclaw:${{ steps.latest.outputs.image_tag }}|' Dockerfile
 
       - name: Create Pull Request
-        if: steps.latest.outputs.tag != steps.current.outputs.tag
+        if: steps.latest.outputs.image_tag != steps.current.outputs.image_tag
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "chore: bump openclaw to ${{ steps.latest.outputs.tag }}"
-          branch: "chore/openclaw-${{ steps.latest.outputs.tag }}"
-          title: "chore: bump openclaw to ${{ steps.latest.outputs.tag }}"
+          commit-message: "chore: bump openclaw image to ${{ steps.latest.outputs.image_tag }}"
+          branch: "chore/openclaw-${{ steps.latest.outputs.image_tag }}"
+          title: "chore: bump openclaw image to ${{ steps.latest.outputs.image_tag }}"
           body: |
             Automated weekly check found a new OpenClaw release.
 
-            - **Previous version:** `${{ steps.current.outputs.tag }}`
-            - **New version:** `${{ steps.latest.outputs.tag }}`
+            - **Previous version:** `${{ steps.current.outputs.image_tag }}`
+            - **New version:** `${{ steps.latest.outputs.image_tag }}`
 
-            [Release notes](https://github.com/openclaw/openclaw/releases/tag/${{ steps.latest.outputs.tag }})
+            [Release notes](https://github.com/openclaw/openclaw/releases/tag/${{ steps.latest.outputs.gh_tag }})
 
-            > Merge this PR to trigger a Railway redeploy with the new version.
+            > Merge this PR to trigger a Railway redeploy with the new image.
           delete-branch: true
