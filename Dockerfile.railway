@@ -9,8 +9,8 @@ FROM ghcr.io/derekcheungsa/openclaw-railway-template-easy-config-base:latest
 WORKDIR /app
 
 # Wrapper deps
-COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --prod --frozen-lockfile && pnpm store prune
+COPY package.json package-lock.json ./
+RUN npm install --omit=dev
 
 # Copy all skills
 COPY skills /tmp/skills
