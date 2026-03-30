@@ -1,33 +1,12 @@
 # syntax=docker/dockerfile:1
-# Pull pre-built openclaw image
-ARG OPENCLAW_IMAGE=ghcr.io/openclaw/openclaw:2026.3.28-slim
-FROM ${OPENCLAW_IMAGE} AS openclaw-source
-
-# Use pre-built base image (heavy deps: apt, Homebrew, Chrome, Python)
+# All heavy deps (apt, Python, openclaw, npm) are pre-built in the base image.
+# Railway only pushes src/ + skills/ as new layers — keeps deploys fast.
 FROM ghcr.io/derekcheungsa/openclaw-railway-template-easy-config-base:latest
 
 WORKDIR /app
-
-# Wrapper deps
-COPY package.json package-lock.json ./
-RUN npm install --omit=dev
-
-# Copy all skills
-COPY skills /tmp/skills
-
-WORKDIR /app
-
-# Copy pre-built openclaw
-COPY --from=openclaw-source /app /openclaw
-
-# Provide an openclaw executable
-RUN printf '%s\n' '#!/usr/bin/env bash' 'exec node /openclaw/openclaw.mjs "$@"' > /usr/local/bin/openclaw \
-  && chmod +x /usr/local/bin/openclaw
-
 COPY src ./src
-
-# Copy skills with installed dependencies
-RUN mkdir -p /data/.openclaw && cp -r /tmp/skills /data/.openclaw/skills && rm -rf /tmp/skills
+RUN mkdir -p /data/.openclaw
+COPY skills /data/.openclaw/skills
 
 ENV PORT=8080
 EXPOSE 8080
