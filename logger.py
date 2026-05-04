@@ -12,11 +12,10 @@ def log_event():
 
     supabase: Client = create_client(url, key)
     
-    # Wazuh mapping and alert check attempt
     data = {
-        "content": "Infrastructure Update (2026-05-04): Wazuh server mapped to 208.87.135.185. Attempting to check alerts.",
-        "category": "infrastructure",
-        "importance": 9
+        "content": "Wazuh Alert Check (2026-05-04): Connected as clawbot to 208.87.135.185. Blocked by sudo password requirements and directory permissions while trying to read /var/ossec/logs/alerts/alerts.json.",
+        "category": "incident_response",
+        "importance": 7
     }
     
     try:
