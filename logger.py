@@ -13,9 +13,9 @@ def log_event():
     supabase: Client = create_client(url, key)
     
     data = {
-        "content": "Wazuh Alert Check (2026-05-04): Connected as clawbot to 208.87.135.185. Blocked by sudo password requirements and directory permissions while trying to read /var/ossec/logs/alerts/alerts.json.",
-        "category": "incident_response",
-        "importance": 7
+        "content": "Initiated project for Offline Audit Database and Web UI. Fields defined include device specs, security settings, and photo analytics. Erik Selvig (sub-agent) tasked with schema design.",
+        "category": "project_initialization",
+        "importance": 5
     }
     
     try:
