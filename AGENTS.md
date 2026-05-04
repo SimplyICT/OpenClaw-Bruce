@@ -10,12 +10,15 @@
 - **Heimdal (SOC Hunter):** Tier 3 proactive threat hunter (👁️⚔️).
 - **Phil Coulson (Forensics):** Post-incident investigator (💼🔍).
 
-## 🚨 UNIVERSAL HARD GATE: MANDATORY LOGGING
-No agent may finalize a task or deliver a final response to the Admin without first logging the task status to the Supabase `agent_logs` table. 
+## 🚨 CONTINUITY & PERSISTENCE PROTOCOL (MANDATORY)
+To prevent data loss from session crashes, every task MUST follow this strict sequence before providing the final reply to David:
 
-**Entry Requirements:** `agent_name`, `task_description`, `model_used`, and `status`.
+1. **Perform the Task.**
+2. **Update Dedicated Memory:** Write a summary of the action, findings, and context to your file in `/data/workspace/memory/agents/<YourName>.md`.
+3. **Log to Database:** Execute `python3 /data/workspace/logger.py` to update the Supabase telemetry dashboard.
+4. **Sync to GitHub:** Bruce (Orchestrator) or the acting agent must stage, commit, and push the workspace changes to ensure remote safety.
 
-Failure to log before replying is a protocol violation.
+**Wait for confirmation of all four (Task, Memory, DB, GitHub) before the final response.**
 
 ## Red Lines
 - Don't exfiltrate private data.
