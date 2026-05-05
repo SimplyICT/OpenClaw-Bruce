@@ -119,10 +119,10 @@
 <body>
     <div class="header">
         <div>
-            <h1>MISSION CONTROL : ASGARD [v2.0.9]</h1>
+            <h1>MISSION CONTROL : ASGARD [v2.1.0]</h1>
             <div style="font-size: 0.7em; color: var(--text-gold);">[ SYSTEM_INITIALIZED // ORCHESTRATOR_BRUCE_ONLINE ]</div>
         </div>
-        <div class="live-tag" id="refreshIndicator">● STALENESS_MONITOR_ACTIVE</div>
+        <div class="live-tag" id="refreshIndicator" style="border: 1px solid var(--primary-red); padding: 2px 5px;">● DATA_SYNC: ACTIVE [v2.1.0]</div>
     </div>
 
     <div class="dashboard-grid">
@@ -228,25 +228,43 @@
                     document.getElementById('auditProgress').max = total;
                     document.getElementById('coveragePercent').innerText = `${Math.round(progress)}%`;
 
-                    // Populate Risky Assets List in Site Card
+                    // Populate Risky Assets List in Site Card with Room Names
                     const riskDiv = document.getElementById('siteHighRisks');
                     riskDiv.innerHTML = missing.length > 0 ? 
-                        '<div style="color:var(--text-gold); font-weight:bold; margin-bottom:5px;">[ MISSING_ASSETS ]</div>' + 
-                        missing.map(m => `• SN: ${m.serial_number}`).join('<br>') : '';
+                        '<div style="color:var(--text-gold); font-weight:bold; margin-bottom:5px;">[ MISSING_ASSET_REGISTER ]</div>' + 
+                        missing.map(m => `• <span style="color:#fff;">${m.devices?.assigned_user_room || 'UNKNOWN'}</span> (SN: ${m.serial_number})`).join('<br>') : 
+                        '<div style="color:var(--terminal-green); opacity:0.6;">[ ALL_ASSETS_ACCOUNTED_FOR ]</div>';
 
-                    // Enhanced Priority Remediation with Reasons
+                    // logic for 30-day staleness (86400000 ms * 30)
+                    const thirtyDaysAgo = new Date() - (30 * 24 * 60 * 60 * 1000);
+
+                    // Enhanced Priority Remediation with Reasons & Staleness
                     const needsAttention = entries
-                        .filter(r => !r.ignore_flag && ((r.photos_count || 0) > 100 || r.onedrive_status === 'Failed' || (r.notes && r.notes.toLowerCase().includes('fail'))))
+                        .filter(r => {
+                            if (r.ignore_flag) return false;
+                            
+                            const auditDate = new Date(r.audit_date || r.audit_timestamp);
+                            r.isStale = auditDate < thirtyDaysAgo;
+                            r.hasBreach = (r.photos_count || 0) > 100;
+                            r.hasSyncIssue = r.onedrive_status === 'Failed' || (r.notes && r.notes.toLowerCase().includes('fail'));
+                            
+                            return r.isStale || r.hasBreach || r.hasSyncIssue;
+                        })
                         .sort((a,b) => (b.photos_count || 0) - (a.photos_count || 0))
                         .slice(0,5);
 
                     document.getElementById('priorityList').innerHTML = needsAttention.map(r => {
-                        let reason = "SYNC_ERROR";
-                        if ((r.photos_count || 0) > 100) reason = `LIABILITY: ${r.photos_count} PHOTOS`;
-                        else if (r.notes && r.notes.toLowerCase().includes('password')) reason = "AUTH_FAIL";
+                        let reason = "";
+                        if (r.hasBreach) reason = `LIABILITY: ${r.photos_count} PHOTOS`;
+                        else if (r.hasSyncIssue) reason = "SYNC_ERROR";
+                        else if (r.isStale) reason = "AUDIT_STALE (>30D)";
+
                         return `<div class="agent-item" style="background:rgba(255, 23, 68, 0.1); padding:5px; margin-bottom:2px;">
-                            <span>${r.devices?.assigned_user_room || 'UNASSIGNED'}</span>
-                            <span style="color:var(--primary-red); font-weight:bold;">[${reason}]</span>
+                            <div>
+                                <div style="color:var(--text-gold); font-weight:bold;">${r.devices?.assigned_user_room || 'UNASSIGNED'}</div>
+                                <div style="font-size:0.65em;">SN: ${r.serial_number}</div>
+                            </div>
+                            <span style="color:var(--primary-red); font-weight:bold; font-size:0.8em; text-align:right;">[${reason}]</span>
                         </div>`;
                     }).join('');
                 }
