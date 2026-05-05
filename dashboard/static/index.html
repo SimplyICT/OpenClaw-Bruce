@@ -109,21 +109,32 @@
 
     <div class="dashboard-grid">
         <!-- Site Audit Stats -->
-        <div class="card">
-            <h2>🏠 Benowa ELC Compliance</h2>
+        <div class="card" id="siteCard">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h2 id="currentSiteName">🏠 Benowa ELC</h2>
+                <select id="sitePicker" style="background:#3d3d3d; color:white; border:1px solid var(--primary-red); border-radius:4px; font-size:0.8em;">
+                    <option value="Benowa ELC">Benowa ELC</option>
+                </select>
+            </div>
             <div class="stats-grid">
                 <div class="stat-box">
-                    <div class="stat-value" id="activeDevices">33</div>
+                    <div class="stat-value" id="activeDevices">0</div>
                     <div class="stat-label">Active Assets</div>
                 </div>
                 <div class="stat-box">
-                    <div class="stat-value" id="missingAssets">11</div>
+                    <div class="stat-value" id="missingAssets">0</div>
                     <div class="stat-label">Missing/Risk</div>
                 </div>
             </div>
-            <div style="margin-top:15px; text-align:center;">
-                <progress id="auditProgress" value="33" max="44" style="width:100%; height:20px;"></progress>
-                <div class="stat-label" style="margin-top:5px;">Audit Coverage Index</div>
+            <div style="margin-top:10px;">
+                <div class="stat-label" style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                    <span>Audit Coverage</span>
+                    <span id="coveragePercent">0%</span>
+                </div>
+                <progress id="auditProgress" value="0" max="100" style="width:100%; height:12px;"></progress>
+            </div>
+            <div id="siteHighRisks" style="margin-top:15px; font-size:0.85em; color:#ff5252; max-height:100px; overflow-y:auto;">
+                <!-- High risks like photo breaches populated here -->
             </div>
         </div>
 
@@ -194,16 +205,46 @@
         const _supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
         async function updateDashboard() {
-            // Update Audit Stats
-            const { data: active } = await _supabase.from('audit_entries').select('serial_number').eq('site_name', 'Benowa ELC').eq('ignore_flag', false);
-            const { data: missing } = await _supabase.from('audit_entries').select('serial_number').eq('site_name', 'Benowa ELC').eq('ignore_flag', true);
-            
-            if(active) document.getElementById('activeDevices').innerText = [...new Set(active.map(r => r.serial_number))].length;
-            if(missing) document.getElementById('missingAssets').innerText = [...new Set(missing.map(r => r.serial_number))].length;
+            const currentSite = document.getElementById('sitePicker').value;
+            document.getElementById('currentSiteName').innerText = `🏠 ${currentSite}`;
 
-            // Update Intelligence Feed from chat history or telemetry
-            // (Placeholder for now, we'll connect this to the chat_logger table next)
+            // 1. Refresh Site List
+            const { data: sites } = await _supabase.from('sites').select('site_name');
+            if (sites) {
+                const picker = document.getElementById('sitePicker');
+                const selected = picker.value;
+                picker.innerHTML = sites.map(s => `<option value="${s.site_name}" ${s.site_name === selected ? 'selected' : ''}>${s.site_name}</option>`).join('');
+            }
+
+            // 2. Update Audit Stats for Selected Site
+            const { data: entries } = await _supabase.from('audit_entries').select('*').eq('site_name', currentSite);
+            
+            if(entries) {
+                const uniqueSerials = [...new Set(entries.map(r => r.serial_number))];
+                const active = entries.filter(r => !r.ignore_flag && uniqueSerials.includes(r.serial_number));
+                const missing = entries.filter(r => r.ignore_flag && uniqueSerials.includes(r.serial_number));
+                
+                const activeCount = [...new Set(active.map(r => r.serial_number))].length;
+                const missingCount = [...new Set(missing.map(r => r.serial_number))].length;
+                const total = activeCount + missingCount;
+
+                document.getElementById('activeDevices').innerText = activeCount;
+                document.getElementById('missingAssets').innerText = missingCount;
+                
+                const progress = total > 0 ? (activeCount / total) * 100 : 0;
+                document.getElementById('auditProgress').value = activeCount;
+                document.getElementById('auditProgress').max = total;
+                document.getElementById('coveragePercent').innerText = `${Math.round(progress)}%`;
+
+                // 3. Populate High Risk Feed (Photo Breaches)
+                const breaches = entries.filter(r => r.photos_count > 100);
+                const riskDiv = document.getElementById('siteHighRisks');
+                riskDiv.innerHTML = breaches.length > 0 ? '<strong>⚠️ BREACH ALERTS:</strong><br>' + 
+                    breaches.map(b => `• ${b.serial_number}: ${b.photos_count} photos`).join('<br>') : '';
+            }
         }
+
+        document.getElementById('sitePicker').addEventListener('change', updateDashboard);
 
         setInterval(updateDashboard, 30000);
         updateDashboard();
