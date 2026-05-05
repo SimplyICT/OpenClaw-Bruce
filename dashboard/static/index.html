@@ -189,16 +189,60 @@
             <div class="agent-item"><span>SUPABASE</span> <span style="color:var(--terminal-green);">[CONNECTED]</span></div>
             <div class="agent-item"><span>GITHUB</span> <span style="color:var(--text-gold);">[PASS]</span></div>
             <div class="agent-item"><span>SHAREPOINT</span> <span style="color:var(--terminal-green);">[LINK]</span></div>
+            
+            <div style="margin-top: 20px;">
+                <button id="btnMagicReport" onclick="triggerMagicReport()" style="width:100%; padding:10px; background:var(--primary-red); color:#fff; border:none; font-family:monospace; cursor:pointer; font-weight:bold; box-shadow: 0 0 10px var(--border-glow);">
+                    🚀 MAGIC_REPORT_UPLOAD
+                </button>
+                <div id="reportStatus" style="font-size:0.6em; margin-top:5px; text-align:center;">[ STANDBY ]</div>
+            </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- CACHE_BUST: 2026-05-05_09:15_V213_FINAL -->
+    <!-- CACHE_BUST: 2026-05-05_09:30_MAGIC_BUTTON -->
     <script>
         const SUPABASE_URL = 'https://zhvxjuhgfudavxrfsasn.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_6RNTxeaqITfQxj1mCF263Q_5E_n-4Yb';
         const { createClient } = supabase;
         const _supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        async function triggerMagicReport() {
+            const btn = document.getElementById('btnMagicReport');
+            const status = document.getElementById('reportStatus');
+            const siteName = document.getElementById('sitePicker').value;
+
+            btn.disabled = true;
+            btn.innerText = "⌛ PROCESSING...";
+            status.innerText = "[ GENERATING_MD > CONVERTING_DOCX > UPLOADING ]";
+
+            try {
+                const response = await fetch('/api/generate-report', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ site_name: siteName })
+                });
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    btn.style.background = 'var(--terminal-green)';
+                    btn.innerText = "✅ UPLOAD_COMPLETE";
+                    status.innerText = `[ ${result.message.toUpperCase()} ]`;
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (err) {
+                btn.style.background = 'orange';
+                btn.innerText = "❌ FAILED";
+                status.innerText = `[ ERROR: ${err.message.toUpperCase()} ]`;
+            } finally {
+                setTimeout(() => {
+                    btn.disabled = false;
+                    btn.innerText = "🚀 MAGIC_REPORT_UPLOAD";
+                    btn.style.background = 'var(--primary-red)';
+                }, 5000);
+            }
+        }
 
         async function updateDashboard() {
             try {

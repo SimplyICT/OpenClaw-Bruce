@@ -11,9 +11,13 @@ David requested a fix for 'brand_model' column errors appearing in 'audit_entrie
 - Provided `schema_sync.sql` to drop legacy columns from `audit_entries` if they were added during debugging attempts.
 - Created error handling in the UI to capture and display PostgREST errors.
 
-### Next Steps:
-- User to apply `schema_sync.sql` in Supabase SQL editor.
-- User to test `index_v5.html`.
+## Protocol: Live Dashboard Access
+To bypass Githack/GitHub caching, always create/update `LIVE_URL.md` with a timestamped query string (e.g., `index.html?v=YYYYMMDD_HHMM`). This is the only way David can view live changes without local IP access or Railway auth loops.
+
+## Task: Dashboard v2.1.4 Deployment
+- Finalized v2.1.4 with descriptive sync errors ([PASSWORD_FAIL], etc.).
+- Established `LIVE_URL.md` as the primary access point.
+- Verified all persistence links (GitHub/Supabase) are active.
 
 
 
