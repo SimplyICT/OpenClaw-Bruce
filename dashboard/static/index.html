@@ -119,10 +119,10 @@
 <body>
     <div class="header">
         <div>
-            <h1>MISSION CONTROL : ASGARD [v2.0.6]</h1>
+            <h1>MISSION CONTROL : ASGARD [v2.0.7]</h1>
             <div style="font-size: 0.7em; color: var(--text-gold);">[ SYSTEM_INITIALIZED // ORCHESTRATOR_BRUCE_ONLINE ]</div>
         </div>
-        <div class="live-tag">● DATA_REFRESH_ACTIVE</div>
+        <div class="live-tag" id="refreshIndicator">● DATA_REFRESH_ACTIVE</div>
     </div>
 
     <div class="dashboard-grid">
@@ -193,7 +193,7 @@
         const _supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
         // Version Control for Log
-        const HUD_VERSION = "2.0.6";
+        const HUD_VERSION = "2.0.7";
 
         async function updateDashboard() {
             try {
