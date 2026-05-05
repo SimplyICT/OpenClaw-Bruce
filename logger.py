@@ -1,28 +1,25 @@
 import os
-import sys
-import datetime
-from supabase import create_client, Client
+from supabase import create_client
 
-def log_event():
-    url = os.environ.get("SUPABASE_URL") or "https://zhvxjuhgfudavxrfsasn.supabase.co"
-    key = os.environ.get("SUPABASE_KEY") or "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpodnhqdWhnZnVkYXZ4cmZzYXNuIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Njc5OTQxOSwiZXhwIjoyMDkyMzc1NDE5fQ.-Y38GK4eJ6ddTRnMKnoCF1iQIdmiwAYEbvuSeKTDd4E"
-    if not url or not key:
-        print("Error: SUPABASE_URL or SUPABASE_KEY not set.")
-        sys.exit(1)
-
-    supabase: Client = create_client(url, key)
+def log_task(agent_name, task_description, model_used, status):
+    url = "https://zhvxjuhgfudavxrfsasn.supabase.co"
+    key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpodnhqdWhnZnVkYXZ4cmZzYXNuIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Njc5OTQxOSwiZXhwIjoyMDkyMzc1NDE5fQ.-Y38GK4eJ6ddTRnMKnoCF1iQIdmiwAYEbvuSeKTDd4E"
     
+    supabase = create_client(url, key)
     data = {
-        "content": "Initiated project for Offline Audit Database and Web UI. Fields defined include device specs, security settings, and photo analytics. Erik Selvig (sub-agent) tasked with schema design.",
-        "category": "project_initialization",
-        "importance": 5
+        "agent_name": agent_name,
+        "task_description": task_description,
+        "model_used": model_used,
+        "status": status
     }
-    
     try:
-        response = supabase.table("agent_memories").insert(data).execute()
-        print(f"Logged to Supabase (agent_memories): {response}")
+        supabase.table("agent_logs").insert(data).execute()
+        return True
     except Exception as e:
-        print(f"Failed to log to Supabase: {e}")
+        print(f"Logging failed: {e}")
+        return False
 
 if __name__ == "__main__":
-    log_event()
+    import sys
+    if len(sys.argv) == 5:
+        log_task(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])

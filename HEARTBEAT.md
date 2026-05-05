@@ -1,7 +1,6 @@
-# HEARTBEAT.md Template
+# HEARTBEAT.md
 
-```markdown
-# Keep this file empty (or with only comments) to skip heartbeat API calls.
+- [ ] Every 4 hours: Perform workspace backup to GitHub (Stage, Commit, Push).
+- [ ] Monitor and report on any high/critical security findings.
 
-# Add tasks below when you want the agent to check something periodically.
-```
+(Ollama audits paused until 192.168.1.102 handshake is stable)
