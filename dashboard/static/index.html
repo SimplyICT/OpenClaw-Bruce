@@ -193,7 +193,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- CACHE_BUST: 2026-05-05_08:56 -->
+    <!-- CACHE_BUST: 2026-05-05_09:09_DESCRIPTIVE_ERRORS -->
     <script>
         const SUPABASE_URL = 'https://zhvxjuhgfudavxrfsasn.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_6RNTxeaqITfQxj1mCF263Q_5E_n-4Yb';
@@ -254,7 +254,13 @@
 
                     document.getElementById('priorityList').innerHTML = needsAttention.map(r => {
                         let reason = "";
-                        if (r.hasSyncIssue) reason = "SYNC_ERROR";
+                        if (r.hasSyncIssue) {
+                            // Extract the specific error from notes if sync failed
+                            const note = (r.notes || "").toUpperCase();
+                            if (note.includes("PASSWORD")) reason = "PASSWORD_FAIL";
+                            else if (note.includes("REMEDIATION")) reason = "REMEDIATION_REQ";
+                            else reason = "SYNC_ERROR";
+                        }
                         else if (r.isStale) reason = "AUDIT_STALE (>30D)";
 
                         return `<div class="agent-item" style="background:rgba(255, 23, 68, 0.1); padding:5px; margin-bottom:2px;">
