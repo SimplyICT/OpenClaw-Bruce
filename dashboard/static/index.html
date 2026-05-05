@@ -249,6 +249,26 @@
                 const riskDiv = document.getElementById('siteHighRisks');
                 riskDiv.innerHTML = breaches.length > 0 ? '<strong>⚠️ BREACH ALERTS:</strong><br>' + 
                     breaches.map(b => `• ${b.serial_number}: ${b.photos_count} photos`).join('<br>') : '';
+
+                // 4. Top 3 Needs Attention (Remediation)
+                const needsAttention = entries
+                    .filter(r => !r.ignore_flag && (r.photos_count > 0 || r.onedrive_status === 'Failed' || (r.notes && r.notes.toLowerCase().includes('fail'))))
+                    .sort((a, b) => (b.photos_count || 0) - (a.photos_count || 0))
+                    .slice(0, 3);
+
+                const priorityDiv = document.getElementById('priorityList');
+                priorityDiv.innerHTML = needsAttention.length > 0 ? 
+                    needsAttention.map((r, i) => `
+                        <div class="agent-item" style="border-left: 3px solid ${i === 0 ? '#ff1744' : '#ff9100'}; padding-left: 10px; margin-bottom: 5px; background: #333;">
+                            <div>
+                                <div style="color:var(--text-gold); font-weight:bold;">${r.devices?.assigned_user_room || 'Unknown'}</div>
+                                <div style="font-size:0.8em;">SN: ${r.serial_number}</div>
+                            </div>
+                            <div style="text-align:right;">
+                                <div style="color:#ff5252; font-size:0.8em;">${r.photos_count > 0 ? r.photos_count + ' photos' : 'Sync Fail'}</div>
+                            </div>
+                        </div>
+                    `).join('') : '<div class="stat-label">No immediate remediation required. Clean site!</div>';
             }
         }
 
