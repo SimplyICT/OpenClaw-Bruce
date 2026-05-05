@@ -1,33 +1,21 @@
-# Session Log - 2026-05-04
+# Session Log - 2026-05-05 (Current)
 
-## Task: Audit Database & Web Page (Final Deep Dive)
-David requested a fix for 'brand_model' column errors appearing in 'audit_entries'.
+## 🚨 MISSION CRITICAL STATUS
+- **Current Objective:** Automate SharePoint Report Uploads via "Magic Button"
+- **Live Version:** Audit Hub v5.6 (using Supabase Queue architecture)
+- **Protocol:** "The Asgardian Watcher" - Browser writes to 'report_requests' table, backend 'watcher.py' executes.
 
-### Solution implemented:
-- Validated that `schema_v4.sql` is correct: `brand_model` exists ONLY in `devices`.
-- Created `index_v5.html`: Refactored the submission logic to use a two-step process. 
-  1. `upsert` to `devices` (includes brand_model).
-  2. `insert` to `audit_entries` (strictly excludes brand_model).
-- Provided `schema_sync.sql` to drop legacy columns from `audit_entries` if they were added during debugging attempts.
-- Created error handling in the UI to capture and display PostgREST errors.
+## Environment State
+- **Watcher PID:** 15324 (Active)
+- **SQL Queue:** 'report_requests' table created and RLS disabled (Grant ALL).
+- **Access Link:** https://raw.githack.com/SimplyICT/OpenClaw-Bruce/main/dashboard/static/audit_hub_v56.html
 
-## Protocol: Live Dashboard Access
-To bypass Githack/GitHub caching, always create/update `LIVE_URL.md` with a timestamped query string (e.g., `index.html?v=YYYYMMDD_HHMM`). This is the only way David can view live changes without local IP access or Railway auth loops.
+## Recent Actions
+- Successfully established end-to-end bridge from Audit Hub to SharePoint.
+- Fixed 404/Unexpected Token errors by moving away from Railway API to Supabase Queue.
+- Discovered 'reporter.py' exit 1 on empty data; manually testing with 2026-05-04 data to verify pipe.
 
-## Task: Dashboard v2.1.4 Deployment
-- Finalized v2.1.4 with descriptive sync errors ([PASSWORD_FAIL], etc.).
-- Established `LIVE_URL.md` as the primary access point.
-- Verified all persistence links (GitHub/Supabase) are active.
-
-
-
-
-
-
-
-
-
-
-
-
-
+## Next Steps (MANDATORY POST-RESET)
+1. Check process list for 'watcher.py'.
+2. Verify 'LIVE_URL.md' is current.
+3. Sync workspace to GitHub (git push).
