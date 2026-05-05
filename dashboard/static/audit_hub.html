@@ -129,7 +129,7 @@
             btn.innerText = "⌛ PROCESSING...";
             status.innerText = "[ GEN_REPORTS > SHAREPOINT_SYNC ]";
             try {
-                const response = await fetch('/api/generate-report', {
+                const response = await fetch('https://openclaw-bruce-production.up.railway.app/api/generate-report', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ site_name: siteName })
