@@ -48,15 +48,25 @@ def log_alert_to_squad(client_name, incident):
     sb = create_client(SUPABASE_URL, SUPABASE_KEY)
     severity = incident.get('severity', 'informational')
     title = incident.get('title', 'Unknown Defender Alert')
+    incident_id = incident.get('id', 'N/A')
     
-    # Alert Thor
-    data = {
-        "agent_name": "Thor",
-        "task_description": f"DEFENDER XDR [{client_name}]: {severity.upper()} - {title}",
-        "status": "RESPONDING" if severity.lower() in ['high', 'medium'] else "ACTIVE",
-        "model_used": "Defender-XDR-Monitor"
-    }
-    sb.table("agent_logs").insert(data).execute()
+    # Expanded detail logic for the new drill-down modals
+    summary = f"DEFENDER XDR [{client_name}]"
+    intel = f"ALRT_ID: {incident_id} || SEVERITY: {severity.upper()} || TITLE: {title}"
+    remediation = "ACTION: XDR Automated Investigation triggered. Monitoring for host isolation requirement."
+
+    full_task_description = f"{summary} || {intel} || {remediation}"
+    
+    # Alert Thor and Sif
+    for agent in ["Thor", "Lady Sif"]:
+        data = {
+            "agent_name": agent,
+            "task_description": full_task_description,
+            "status": "RESPONDING" if severity.lower() in ['high', 'medium'] else "ACTIVE",
+            "model_used": "Asgard-XDR-Watcher-v1"
+        }
+        sb.table("agent_logs").insert(data).execute()
+        print(f"DEBUG: Auto-logged {agent} for {client_name} - {severity}")
 
 def monitor_all_tenants():
     print(f"🛡️ Asgard Multi-Tenant XDR Watcher active. Monitoring {len(TENANTS)} clients...")
