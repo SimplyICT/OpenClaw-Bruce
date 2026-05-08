@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🛡️ Asgard Audit v20.0</title>
+    <title>🛡️ Asgard Audit v20.1</title>
     <style>
         body { font-family: sans-serif; max-width: 1400px; margin: 20px auto; padding: 0 10px; background-color: #f4f4f9; }
         .container { display: grid; grid-template-columns: 50% 50%; gap: 20px; }
@@ -24,7 +24,7 @@
     </style>
 </head>
 <body>
-    <h2>🛡️ Asgardian Audit Hub (v20.0)</h2>
+    <h2>🛡️ Asgardian Audit Hub (v20.1)</h2>
     <div id="statLog" class="status-bar">Ready for Multi-Historical Audit Selection</div>
     
     <div class="container">
@@ -90,6 +90,8 @@
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         const form = document.getElementById('auditForm');
 
+        let deviceHistoryStore = [];
+
         async function refreshNames() {
             const site = document.getElementById('siteSelect').value;
             const { data: entries } = await _supabase.from('audit_entries').select('serial_number').eq('site_name', site);
@@ -112,9 +114,20 @@
                 document.getElementById('roomField').value = device.assigned_user_room || "";
             }
 
-            // Recall Compliance for FORM A (Latest only for updating)
-            const { data: last } = await _supabase.from('audit_entries').select('*').eq('serial_number', sn).order('audit_date', { ascending: false }).limit(1).maybeSingle();
-            if (last) {
+            // Build List for FORM B (Historical Versions)
+            const { data: history } = await _supabase.from('audit_entries').select('*').eq('serial_number', sn).order('audit_date', { ascending: false });
+            deviceHistoryStore = history || [];
+            const listArea = document.getElementById('historyListArea');
+            if (deviceHistoryStore.length > 0) {
+                listArea.innerHTML = deviceHistoryStore.map((h, i) => `
+                    <div class="history-item" onclick='viewHistoricalRecord(${i})'>
+                        <strong>AUDIT DATE: ${h.audit_date}</strong><br>
+                        <small>Site: ${h.site_name} | Notes: ${h.notes ? h.notes.substring(0, 30) + '...' : 'N/A'}</small>
+                    </div>
+                `).join('');
+
+                // Auto-populate FORM A (Update Form) with the latest entry
+                const last = deviceHistoryStore[0];
                 form.elements['onedrive_status'].value = last.onedrive_status || "";
                 form.elements['windows_updates'].value = last.windows_updates || "";
                 form.elements['security_check'].value = last.security_check || "";
@@ -125,23 +138,15 @@
                 form.elements['photos_count'].value = last.photos_count || 0;
                 form.elements['photos_date'].value = last.photos_date || "";
                 form.elements['notes'].value = last.notes || "";
+                
+            } else {
+                listArea.innerHTML = "<p>No history found.</p>";
             }
-
-            // Build List for FORM B (Historical Versions)
-            const { data: history } = await _supabase.from('audit_entries').select('*').eq('serial_number', sn).order('audit_date', { ascending: false });
-            const listArea = document.getElementById('historyListArea');
-            if (history) {
-                listArea.innerHTML = history.map((h, i) => `
-                    <div class="history-item" onclick='viewHistoricalRecord(${JSON.stringify(h)})'>
-                        <strong>AUDIT DATE: ${h.audit_date}</strong><br>
-                        <small>Site: ${h.site_name} | Notes: ${h.notes ? h.notes.substring(0, 30) + '...' : 'N/A'}</small>
-                    </div>
-                `).join('');
-            }
-            log.innerText = `Data loaded for ${sn}. Latest populated in Form A. Versions available in Form B.`;
+            log.innerText = `Recalled ${deviceHistoryStore.length} audit records for ${sn}.`;
         }
 
-        function viewHistoricalRecord(h) {
+        function viewHistoricalRecord(index) {
+            const h = deviceHistoryStore[index];
             const area = document.getElementById('historicalDetails');
             const fields = [
                 ['Date', h.audit_date], ['Site', h.site_name], ['SN', h.serial_number],
