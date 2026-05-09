@@ -27,7 +27,7 @@
     </style>
 </head>
 <body>
-    <h2>🛡️ Asgardian Audit Hub (v5.9)</h2>
+    <h2>🛡️ Asgardian Audit Hub (v5.9.1)</h2>
     <div class="container">
         <div class="form-panel">
             <div class="site-manager">
@@ -39,6 +39,9 @@
                 <div style="margin-top:20px; background:#fff0f0; padding:10px; border:1px solid #ff1744; border-radius:5px;">
                     <button id="btnMagic" onclick="triggerMagicReport()" style="width:100%; font-size:1.1em;">🚀 MAGIC_REPORT_UPLOAD</button>
                     <div id="reportStatus" style="font-size:0.75em; margin-top:8px; font-family:monospace; color:#d32f2f; text-align:center;">[ STANDBY ]</div>
+                    <div id="downloadArea" style="display:none; margin-top: 15px; border-top: 1px solid #ff1744; padding-top: 10px; text-align: center;">
+                        <a id="downloadLink" href="#" target="_blank" style="background-color: #1976d2; color: white; text-decoration: none; padding: 10px; display: block; border-radius: 4px; font-weight: bold;">📥 DOWNLOAD .DOCX</a>
+                    </div>
                 </div>
             </div>
             <form id="auditForm">
@@ -112,7 +115,15 @@
                     attempts++;
                     const { data: update } = await _supabase.from('report_requests').select('*').eq('id', reqId).single();
                     if (update.status === 'SUCCESS') {
-                        clearInterval(poller); btn.style.background = '#4caf50'; btn.innerText = "✅ UPLOADED"; status.innerText = `[ SUCCESS: ${update.message.toUpperCase()} ]`; setTimeout(resetBtn, 5000);
+                        clearInterval(poller); btn.style.background = '#4caf50'; btn.innerText = "✅ UPLOADED"; status.innerText = `[ SUCCESS: ${update.message.toUpperCase()} ]`;
+                        
+                        const fileName = `report_${siteName.replace(/ /g, '_')}_${today}.docx`;
+                        const dlArea = document.getElementById('downloadArea');
+                        const dlLink = document.getElementById('downloadLink');
+                        dlLink.href = `https://openclaw-bruce-production.up.railway.app/dashboard/reports/${fileName}`;
+                        dlArea.style.display = 'block';
+                        
+                        setTimeout(resetBtn, 5000);
                     } else if (update.status === 'ERROR') {
                         clearInterval(poller); btn.style.background = 'orange'; btn.innerText = "❌ FAILED"; status.innerText = `[ ERROR: ${update.message.toUpperCase()} ]`; setTimeout(resetBtn, 5000);
                     } else if (attempts > 120) { clearInterval(poller); btn.innerText = "⚠️ TIMEOUT"; status.innerText = "[ ASGARD_NOT_RESPONDING ]"; setTimeout(resetBtn, 5000); }
