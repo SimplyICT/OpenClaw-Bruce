@@ -8,7 +8,7 @@
 - **User:** openclaw
 - **Password:** [REDACTED]
 - **OS:** Ubuntu Server
-- **Role:** Primary Orchestrator (Barry) Native Linux
+- **Role:** Primary Orchestrator Native Linux
 
 ---
-*Note: This information is for Barry to share with specialized agents when performing security tasks.*
+*Note: This information is for sharing with specialized agents when performing security tasks.*
