@@ -24,7 +24,13 @@ On every initialization, before speaking, Bruce must:
 To minimize OpenRouter costs, David has established a "Local-First" policy:
 1. **Large Data Hand-off:** For any task involving analysis of files or logs larger than 5,000 characters, Bruce SHOULD prioritize using the local Ollama server via `asgard_ollama.py`.
 2. **Local Intelligence:** Use `qwen2.5-coder:14b` for complex code analysis and `llama3.1:8b` for general summarization when the context allows.
-3. **Hybrid Workflow:** Use Gemini (OpenRouter) for high-level orchestration and planning, but delegate data-heavy "reading" and "auditing" to the GPU node (100.117.41.63).
+3. **Hybrid Workflow:** Use Gemini (OpenRouter) for high-level orchestration and planning, but delegate data-heavy "reading" and "auditing" to the GPU node (10.121.16.176).
+
+**Model Routing Table:**
+- **openrouter/auto**: Primary orchestration, planning, and short-form reasoning.
+- **qwen2.5-coder:14b (Ollama)**: Code analysis, generation, debugging (>= 5KB files).
+- **llama3.1:8b (Ollama)**: General summarization, text-heavy tasks (<= 5KB).
+- **Gemini (OpenRouter)**: Nuanced language understanding or high-level fallback.
 
 ## Workspace State
 - Railway Production URL: https://openclaw-bruce-production.up.railway.app/
